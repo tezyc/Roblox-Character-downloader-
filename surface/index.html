@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Surface Tools</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #050505;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* =========================
+           TITLE BAR
+        ========================= */
+
+        .titlebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 68px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 30px;
+
+            background: rgba(5, 5, 5, .92);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            border-bottom: 1px solid #242424;
+
+            z-index: 1000;
+        }
+
+        .brand {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+
+        .brand .surface {
+            color: #fff;
+        }
+
+        .brand .tools {
+            color: #666;
+        }
+
+        /* =========================
+           NAV
+        ========================= */
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav button {
+            border: none;
+            outline: none;
+
+            background: transparent;
+            color: #777;
+
+            padding: 9px 14px;
+            border-radius: 9px;
+
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .nav button:hover {
+            color: #fff;
+            background: #141414;
+        }
+
+        .nav button.active {
+            color: #fff;
+            background: #191919;
+        }
+
+        /* =========================
+           APP
+        ========================= */
+
+        .app {
+            min-height: 100vh;
+            padding-top: 68px;
+        }
+
+        .page {
+            display: none;
+            min-height: calc(100vh - 68px);
+        }
+
+        .page.active {
+            display: block;
+            animation: pageIn .3s ease;
+        }
+
+        @keyframes pageIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================
+           HOME
+        ========================= */
+
+        .home {
+            min-height: calc(100vh - 68px);
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            padding: 40px 20px;
+        }
+
+        .home h1 {
+            font-size: clamp(48px, 9vw, 78px);
+            font-weight: 700;
+
+            letter-spacing: -4px;
+            line-height: 1;
+
+            margin-bottom: 20px;
+        }
+
+        .home h1 .surface {
+            color: #fff;
+        }
+
+        .home h1 .tools {
+            color: #666;
+        }
+
+        .home p {
+            max-width: 540px;
+
+            color: #777;
+
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .home-button {
+            margin-top: 28px;
+
+            padding: 12px 20px;
+
+            border: none;
+            border-radius: 11px;
+
+            background: #fff;
+            color: #000;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .home-button:hover {
+            background: #ccc;
+            transform: translateY(-2px);
+        }
+
+        /* =========================
+           DOWNLOAD
+        ========================= */
+
+        .download-page {
+            width: min(900px, 92%);
+            margin: auto;
+
+            padding: 70px 0;
+        }
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+        .page-header h2 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #777;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .downloader {
+            background: rgba(14, 14, 14, .95);
+
+            border: 1px solid #292929;
+            border-radius: 22px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, .45);
+        }
+
+        .search {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search input {
+            flex: 1;
+            min-width: 0;
+
+            height: 50px;
+
+            padding: 0 16px;
+
+            background: #080808;
+
+            border: 1px solid #333;
+            border-radius: 11px;
+
+            outline: none;
+
+            color: #fff;
+
+            font-size: 14px;
+        }
+
+        .search input::placeholder {
+            color: #555;
+        }
+
+        .search input:focus {
+            border-color: #666;
+        }
+
+        .search button {
+            height: 50px;
+
+            padding: 0 22px;
+
+            border: none;
+            border-radius: 11px;
+
+            background: #fff;
+            color: #000;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .search button:hover {
+            background: #ccc;
+            transform: translateY(-1px);
+        }
+
+        .search button:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* =========================
+           RESULT
+        ========================= */
+
+        .result {
+            display: none;
+
+            margin-top: 25px;
+            padding-top: 25px;
+
+            border-top: 1px solid #242424;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .avatar {
+            width: 90px;
+            height: 90px;
+
+            object-fit: cover;
+
+            border-radius: 16px;
+
+            background: #111;
+            border: 1px solid #333;
+        }
+
+        .profile-info h3 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .profile-info p {
+            color: #777;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .download-button {
+            display: inline-block;
+
+            margin-top: 15px;
+            padding: 11px 17px;
+
+            background: #fff;
+            color: #000;
+
+            border-radius: 9px;
+
+            text-decoration: none;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            transition: .2s;
+        }
+
+        .download-button:hover {
+            background: #ccc;
+            transform: translateY(-1px);
+        }
+
+        /* =========================
+           API
+        ========================= */
+
+        .api-page {
+            width: min(1000px, 92%);
+            margin: auto;
+
+            padding: 70px 0;
+        }
+
+        .api-header {
+            margin-bottom: 25px;
+        }
+
+        .api-header h2 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .api-header p {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 16px;
+
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #0e0e0e;
+
+            border: 1px solid #292929;
+            border-radius: 18px;
+
+            padding: 24px;
+
+            transition: .2s;
+        }
+
+        .stat-card:hover {
+            border-color: #444;
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            color: #666;
+
+            font-size: 12px;
+
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .api-box {
+            background: #0e0e0e;
+
+            border: 1px solid #292929;
+            border-radius: 18px;
+
+            padding: 25px;
+        }
+
+        .api-box h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .api-box p {
+            color: #777;
+
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+
+            gap: 8px;
+
+            margin-top: 18px;
+
+            padding: 8px 12px;
+
+            background: #111;
+
+            border: 1px solid #292929;
+            border-radius: 8px;
+
+            color: #888;
+
+            font-size: 12px;
+        }
+
+        .api-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #777;
+        }
+
+        /* =========================
+           POPUP
+        ========================= */
+
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(0, 0, 0, .65);
+
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+
+            opacity: 0;
+            visibility: hidden;
+
+            transition: .25s;
+
+            z-index: 2000;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup {
+            width: min(390px, 88%);
+
+            padding: 25px;
+
+            background: #111;
+
+            border: 1px solid #333;
+            border-radius: 18px;
+
+            text-align: center;
+
+            transform: scale(.85) translateY(15px);
+
+            opacity: 0;
+
+            transition: .3s cubic-bezier(.2,.8,.2,1);
+
+            box-shadow:
+                0 25px 80px rgba(0,0,0,.7);
+        }
+
+        .popup-overlay.show .popup {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .popup-icon {
+            width: 45px;
+            height: 45px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin: 0 auto 15px;
+
+            border: 1px solid #444;
+            border-radius: 50%;
+
+            color: #aaa;
+
+            font-size: 20px;
+        }
+
+        .popup h3 {
+            font-size: 18px;
+            margin-bottom: 7px;
+        }
+
+        .popup p {
+            color: #777;
+
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .popup-close {
+            margin-top: 18px;
+
+            padding: 9px 18px;
+
+            border: none;
+            border-radius: 9px;
+
+            background: #fff;
+            color: #000;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
+            .titlebar {
+                height: 60px;
+                padding: 0 14px;
+            }
+
+            .brand {
+                font-size: 12px;
+            }
+
+            .nav {
+                gap: 3px;
+            }
+
+            .nav button {
+                padding: 7px 8px;
+                font-size: 10px;
+            }
+
+            .app {
+                padding-top: 60px;
+            }
+
+            .page {
+                min-height: calc(100vh - 60px);
+            }
+
+            .home {
+                min-height: calc(100vh - 60px);
+            }
+
+            .home h1 {
+                font-size: clamp(44px, 13vw, 65px);
+                letter-spacing: -3px;
+            }
+
+            .home p {
+                font-size: 14px;
+            }
+
+            .download-page,
+            .api-page {
+                width: 92%;
+                padding: 45px 0;
+            }
+
+            .search {
+                flex-direction: column;
+            }
+
+            .search button {
+                width: 100%;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .profile {
+                align-items: flex-start;
+            }
+
+            .avatar {
+                width: 75px;
+                height: 75px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================
+     TITLE BAR
+========================= -->
+
+<nav class="titlebar">
+
+    <div class="brand">
+        <span class="surface">Surface</span>
+        <span class="tools"> Tools</span>
+    </div>
+
+    <div class="nav">
+
+        <button
+            id="homeTab"
+            class="active"
+            type="button"
+            onclick="showPage('home')">
+            Home
+        </button>
+
+        <button
+            id="downloadTab"
+            type="button"
+            onclick="showPage('download')">
+            Download
+        </button>
+
+        <button
+            id="apiTab"
+            type="button"
+            onclick="showPage('api')">
+            API
+        </button>
+
+    </div>
+
+</nav>
+
+
+<div class="app">
+
+    <!-- =========================
+         HOME
+    ========================= -->
+
+    <section
+        id="home"
+        class="page active">
+
+        <div class="home">
+
+            <h1>
+                <span class="surface">Surface</span>
+                <span class="tools"> Tools</span>
+            </h1>
+
+            <p>
+                Roblox tools made simple.
+                <br>
+                Search, inspect and download
+                Roblox avatar models.
+            </p>
+
+            <button
+                class="home-button"
+                type="button"
+                onclick="showPage('download')">
+
+                Open Downloader
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         DOWNLOAD
+    ========================= -->
+
+    <section
+        id="download"
+        class="page">
+
+        <div class="download-page">
+
+            <div class="page-header">
+
+                <h2>
+                    Roblox Avatar Downloader
+                </h2>
+
+                <p>
+                    Enter a Roblox username to
+                    retrieve and download its
+                    available 3D avatar model.
+                </p>
+
+            </div>
+
+            <div class="downloader">
+
+                <div class="search">
+
+                    <input
+                        id="username"
+                        type="text"
+                        maxlength="20"
+                        placeholder="Enter Roblox username..."
+                        autocomplete="off">
+
+                    <button
+                        id="searchButton"
+                        type="button"
+                        onclick="searchUser()">
+
+                        Search
+
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="result"
+                    id="result">
+
+                    <div class="profile">
+
+                        <img
+                            id="avatar"
+                            class="avatar"
+                            alt="Roblox avatar">
+
+                        <div class="profile-info">
+
+                            <h3 id="displayName">
+                                -
+                            </h3>
+
+                            <p id="usernameResult">
+                                -
+                            </p>
+
+                            <p id="userId">
+                                -
+                            </p>
+
+                            <a
+                                id="downloadButton"
+                                class="download-button"
+                                href="#">
+
+                                Download Avatar
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         API
+    ========================= -->
+
+    <section
+        id="api"
+        class="page">
+
+        <div class="api-page">
+
+            <div class="api-header">
+
+                <h2>
+                    Surface API
+                </h2>
+
+                <p>
+                    API usage and Surface
+                    service statistics.
+                </p>
+
+            </div>
+
+
+            <div class="stats">
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        API REQUESTS
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="apiRequests">
+                        -
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        SEARCHES
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="searchCount">
+                        -
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        DOWNLOADS
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="downloadCount">
+                        -
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="api-box">
+
+                <h3>
+                    API Status
+                </h3>
+
+                <p>
+                    Surface API is used by the
+                    website to retrieve Roblox
+                    user and avatar information.
+                </p>
+
+                <div class="api-status">
+
+                    <span class="api-dot"></span>
+
+                    <span id="apiStatus">
+                        Checking API...
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- =========================
+     POPUP
+========================= -->
+
+<div
+    class="popup-overlay"
+    id="popupOverlay">
+
+    <div class="popup">
+
+        <div
+            class="popup-icon"
+            id="popupIcon">
+            !
+        </div>
+
+        <h3 id="popupTitle">
+            Error
+        </h3>
+
+        <p id="popupMessage">
+            Something went wrong.
+        </p>
+
+        <button
+            class="popup-close"
+            type="button"
+            onclick="closePopup()">
+
+            Close
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/*
+==================================================
+SURFACE CONFIGURATION
+==================================================
+
+CHANGE THIS TO THE ADDRESS WHERE YOUR
+TERMUX FLASK SERVER IS RUNNING.
+
+Examples:
+
+Local Android:
+http://127.0.0.1:8080
+
+Computer on same network:
+http://192.168.1.100:8080
+
+IMPORTANT:
+
+If GitHub Pages is opened on another device,
+127.0.0.1 means THAT DEVICE, NOT YOUR PHONE.
+
+Your Termux server must therefore be reachable
+from the device opening the GitHub website.
+==================================================
+*/
+
+const API_BASE = "http://127.0.0.1:8080";
+
+
+/* =========================
+   PAGE NAVIGATION
+========================= */
+
+function showPage(pageName) {
+
+    const pages =
+        document.querySelectorAll(".page");
+
+    pages.forEach(function(page) {
+        page.classList.remove("active");
+    });
+
+
+    const tabs =
+        document.querySelectorAll(".nav button");
+
+    tabs.forEach(function(tab) {
+        tab.classList.remove("active");
+    });
+
+
+    const selectedPage =
+        document.getElementById(pageName);
+
+    if (!selectedPage) {
+        return;
+    }
+
+    selectedPage.classList.add("active");
+
+
+    if (pageName === "home") {
+        document
+            .getElementById("homeTab")
+            .classList.add("active");
+    }
+
+    if (pageName === "download") {
+        document
+            .getElementById("downloadTab")
+            .classList.add("active");
+    }
+
+    if (pageName === "api") {
+        document
+            .getElementById("apiTab")
+            .classList.add("active");
+
+        loadAPIStats();
+    }
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+/* =========================
+   POPUP
+========================= */
+
+function showPopup(title, message) {
+
+    document.getElementById("popupTitle").textContent =
+        title;
+
+    document.getElementById("popupMessage").textContent =
+        message;
+
+    document.getElementById("popupOverlay")
+        .classList.add("show");
+}
+
+
+function closePopup() {
+
+    document.getElementById("popupOverlay")
+        .classList.remove("show");
+}
+
+
+/* =========================
+   SEARCH USER
+========================= */
+
+async function searchUser() {
+
+    const input =
+        document.getElementById("username");
+
+    const button =
+        document.getElementById("searchButton");
+
+    const result =
+        document.getElementById("result");
+
+    const username =
+        input.value.trim();
+
+
+    if (!username) {
+
+        showPopup(
+            "Username Required",
+            "Please enter a Roblox username."
+        );
+
+        return;
+    }
+
+
+    button.disabled = true;
+    button.textContent = "Searching...";
+
+    result.style.display = "none";
+
+
+    try {
+
+        const url =
+            API_BASE +
+            "/api/user?username=" +
+            encodeURIComponent(username);
+
+
+        const response =
+            await fetch(url);
+
+
+        let data;
+
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error(
+                "The API returned an invalid response."
+            );
+        }
+
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.error ||
+                "Roblox user not found."
+            );
+        }
+
+
+        document.getElementById("avatar").src =
+            data.user.thumbnail || "";
+
+
+        document.getElementById("displayName").textContent =
+            data.user.displayName ||
+            data.user.name;
+
+
+        document.getElementById("usernameResult").textContent =
+            "@" + data.user.name;
+
+
+        document.getElementById("userId").textContent =
+            "User ID: " + data.user.id;
+
+
+        document.getElementById("downloadButton").href =
+            API_BASE +
+            "/api/download?username=" +
+            encodeURIComponent(data.user.name);
+
+
+        result.style.display = "block";
+
+    } catch (error) {
+
+        showPopup(
+            "Unable to Find User",
+            error.message
+        );
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = "Search";
+    }
+}
+
+
+/* =========================
+   API STATS
+========================= */
+
+async function loadAPIStats() {
+
+    const status =
+        document.getElementById("apiStatus");
+
+    try {
+
+        const response =
+            await fetch(
+                API_BASE + "/api/stats"
+            );
+
+
+        if (!response.ok) {
+            throw new Error(
+                "Stats endpoint unavailable."
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        document.getElementById("apiRequests")
+            .textContent =
+            data.api_requests ?? 0;
+
+
+        document.getElementById("searchCount")
+            .textContent =
+            data.searches ?? 0;
+
+
+        document.getElementById("downloadCount")
+            .textContent =
+            data.downloads ?? 0;
+
+
+        status.textContent =
+            "API Online";
+
+    } catch (error) {
+
+        status.textContent =
+            "API Unavailable";
+
+        document.getElementById("apiRequests")
+            .textContent = "-";
+
+        document.getElementById("searchCount")
+            .textContent = "-";
+
+        document.getElementById("downloadCount")
+            .textContent = "-";
+    }
+}
+
+
+/* =========================
+   ENTER KEY
+========================= */
+
+document
+    .getElementById("username")
+    .addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Enter") {
+                searchUser();
+            }
+
+        }
+    );
+
+
+/* =========================
+   CLOSE POPUP BY CLICKING
+   OUTSIDE THE BOX
+========================= */
+
+document
+    .getElementById("popupOverlay")
+    .addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                this
+            ) {
+                closePopup();
+            }
+
+        }
+    );
+
+
+/* =========================
+   START ON HOME
+========================= */
+
+showPage("home");
+
+</script>
+
+</body>
+</html>
